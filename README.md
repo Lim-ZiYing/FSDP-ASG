@@ -89,11 +89,12 @@ Open http://localhost:5173
 
 ## Team
 
-| Name | Main area |
-|---|---|
-| [Name] | [e.g. Accounts & login] |
-| [Name] | [e.g. Upvoting & top photo] |
-| [Name] | [e.g. NETS QR payment] |
-| [Name] | [e.g. Ordering & cart] |
+   | Name | Main area |
+   |---|---|
+   | Zi Ying | [e.g. Accounts & login] |
+   | Dana | [area] |
+   | Declan | [area] |
+   | Lennox | [area] |
+   | Siyu | [area] |
 
 Links: [Jira board] · [Figma file](https://www.figma.com/design/HMrIlQdr3NR0NfztB5lc5X)

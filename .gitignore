@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Environment files (contain passwords and keys - never commit these)
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+
+# Uploaded photos saved locally during development
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

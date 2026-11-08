@@ -4,7 +4,7 @@ const tabs = [
   { to: '/', label: 'Home' },
   { to: '/orders', label: 'Orders' },
   { to: '/snap', label: 'Snap' },
-  { to: '/rewards', label: 'Rewards' },
+  { to: '/cart', label: 'Cart' },
 ];
 
 export default function BottomNav() {

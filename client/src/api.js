@@ -62,6 +62,7 @@ export const api = {
 
   // Photos – Dana
   getPhotos: (itemId) => request(`/photos/item/${itemId}`),
+  getTopPhoto: (itemId) => request(`/photos/item/${itemId}/top`),
   uploadPhoto: (itemId, formData) =>
     request(`/photos/item/${itemId}`, { method: 'POST', body: formData, isForm: true }),
 };

@@ -1,0 +1,15 @@
+/* Upload photo page (Dana, FSDP-20) */
+.upload { display: flex; flex-direction: column; gap: 14px; padding-top: 8px; }
+.upload select {
+  height: 48px; padding: 0 14px; font-size: 16px; font-family: inherit;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--white); color: var(--ink);
+}
+.upload-drop {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  position: relative; min-height: 220px; padding: 12px; cursor: pointer;
+  border: 2px dashed var(--line); border-radius: var(--radius); background: var(--white);
+  color: var(--muted); font-weight: 700;
+}
+.upload-drop:focus-within { outline: 2px solid var(--orange); outline-offset: 1px; }
+.upload-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.upload-preview { width: 100%; max-height: 320px; object-fit: cover; border-radius: 14px; }

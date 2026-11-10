@@ -10,7 +10,8 @@ A mobile-friendly web app for people in a rush: order ahead from one or more haw
 |---|---|
 | Front end | React (Vite) |
 | Back end | Node.js + Express |
-| Database | Microsoft SQL Server |
+| Database | Supabase (PostgreSQL) + Supabase Storage for photos |
+| Login | Own Express login (bcrypt passwords + JWT) |
 | Payment | NETS QR Web (sandbox, or a clearly labelled mock) |
 | AI | Image check that rejects non-food photos |
 
@@ -28,20 +29,26 @@ FSDP-ASG/
 │       ├── routes/      auth, stalls, photos, orders
 │       ├── middleware/  requireAuth (JWT check)
 │       └── db.js        MSSQL connection
-├── database/
-│   ├── schema.sql   Creates all tables and views
-│   └── seed.sql     Sample hawker centre, stalls and dishes
+├── database/        Run these in order in the Supabase SQL Editor
+│   ├── 01_schema.sql    Creates all 14 tables
+│   ├── 02_security.sql  Row Level Security (menu data public, the rest private)
+│   ├── 03_extras.sql    Order numbers, indexes, vote rules, views, photo bucket
+│   └── 04_seed.sql      Sample users, stalls, dishes, photos, votes and orders
 └── docs/
     └── CONTRIBUTING.md  How the team uses Git and Jira
 ```
 
 ## Getting started
 
-You need **Node.js 18+** and **SQL Server** (with SSMS or Azure Data Studio).
+You need **Node.js 18+**. The database is the team's shared Supabase project, so you don't install a database yourself.
 
-### 1. Database
-1. Create an empty database called `HawkerEMenu`.
-2. Run `database/schema.sql`, then `database/seed.sql`.
+### 1. Database (already set up in Supabase — only redo this for a fresh project)
+1. Open the Supabase project → **SQL Editor** → **New query**.
+2. Paste and run each file in order: `01_schema.sql`, `02_security.sql`, `03_extras.sql`, `04_seed.sql`.
+3. Ask the project owner for the **Project URL** and **secret key** for `server/.env`. Never commit them.
+
+Useful views: `menu_with_photo` (eMenu with top-voted photo), `top_photos`, `photo_votes`, `stall_queue`.
+Re-running `04_seed.sql` resets all data to the sample data.
 
 ### 2. Back end
 ```bash

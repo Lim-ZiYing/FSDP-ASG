@@ -2,7 +2,7 @@
 
 **Revitalising Hawker Culture in a Digital Economy** — FSDP assignment.
 
-A mobile-friendly web app for people in a rush: order ahead from one or more hawker stalls, pay with NETS QR, and collect at a collection point when the food is ready. Diners upload photos of dishes and upvote the best ones; the top-voted photo becomes the dish's picture on the eMenu.
+*Skip the queue, not the meal.* A mobile-friendly web app for people in a rush, such as office workers on a short lunch break: pre-order from one or more hawker stalls, pay with NETS QR, and collect when the food is ready. Diners upload photos of dishes and upvote the best ones; the top-voted photo becomes the dish's picture on the eMenu.
 
 ## Tech stack
 
@@ -10,56 +10,81 @@ A mobile-friendly web app for people in a rush: order ahead from one or more haw
 |---|---|
 | Front end | React (Vite) |
 | Back end | Node.js + Express |
-| Database | Supabase (PostgreSQL) + Supabase Storage for photos |
+| Database | Supabase (PostgreSQL), plus Supabase Storage and Realtime |
 | Login | Own Express login (bcrypt passwords + JWT) |
-| Payment | NETS QR Web (sandbox, or a clearly labelled mock) |
+| Payment | NETS QR Web |
 | AI | Image check that rejects non-food photos |
+
+The React app never talks to Supabase directly: every request goes **page → `api.js` → Express route → Supabase**. Only the server holds the Supabase keys.
+
+## Team
+
+| Name | Area |
+|---|---|
+| Zi Ying | Accounts, live orders and real-time, hawker side |
+| Dana | Database (Supabase, test data), photo upload, AI food check |
+| Declan | NETS QR payment |
+| Lennox | Cart, ordering, pre-order, order history |
+| Siyu | Stall browsing, eMenu, voting |
 
 ## Folder structure
 
 ```
 FSDP-ASG/
-├── client/          React front end (runs on http://localhost:5173)
-│   └── src/
-│       ├── pages/       One file per screen (Home, StallMenu, Cart...)
-│       ├── components/  Reusable pieces (StallCard, BottomNav...)
-│       └── api.js       All calls to the back end go through here
-├── server/          Express back end (runs on http://localhost:3000)
-│   └── src/
-│       ├── routes/      auth, stalls, photos, orders
-│       ├── middleware/  requireAuth (JWT check)
-│       └── db.js        MSSQL connection
-├── database/        Run these in order in the Supabase SQL Editor
-│   ├── 01_schema.sql    Creates all 14 tables
+├── database/          copies of the Supabase scripts, run in this order       Dana
+│   ├── 01_schema.sql    creates all 14 tables
 │   ├── 02_security.sql  Row Level Security (menu data public, the rest private)
-│   ├── 03_extras.sql    Order numbers, indexes, vote rules, views, photo bucket
-│   └── 04_seed.sql      Sample users, stalls, dishes, photos, votes and orders
-└── docs/
-    └── CONTRIBUTING.md  How the team uses Git and Jira
+│   ├── 03_extras.sql    order numbers, indexes, vote rules, views, photo bucket
+│   └── 04_seed.sql      sample data (WIPES all data, ask the group first)
+├── docs/              CONTRIBUTING.md (team Git routine)
+├── server/src/
+│   ├── index.js       starts the server; all routes already connected
+│   ├── supabase.js    shared Supabase connection
+│   ├── middleware/    requireAuth, requireRole                                Zi Ying
+│   ├── routes/
+│   │   ├── auth.js      sign up, log in, log out                              Zi Ying
+│   │   ├── hawker.js    hawker orders, update status                          Zi Ying
+│   │   ├── stalls.js    stall list, eMenu, search                             Siyu
+│   │   ├── votes.js     upvote, remove vote                                   Siyu
+│   │   ├── orders.js    cart → order, pre-order, history                      Lennox
+│   │   ├── payments.js  NETS QR, confirm payment                              Declan
+│   │   └── photos.js    upload, AI check, community photos                    Dana
+│   └── services/      nets.js (Declan), aiFoodCheck.js (Dana)
+└── client/src/
+    ├── App.jsx        all pages already connected
+    ├── api.js         all calls to the server (shared)
+    ├── auth.jsx       who's logged in                                         Zi Ying
+    ├── components/    reusable pieces (StallCard, VoteButton, CartItem, OrderStatus…)
+    └── pages/         one file per screen, matching the Figma
 ```
+
+Unbuilt endpoints return **501 "Not built yet (FSDP-xx)"** and unbuilt pages show **"Coming soon"**. Replace them as you build each story.
 
 ## Getting started
 
-You need **Node.js 18+**. The database is the team's shared Supabase project, so you don't install a database yourself.
+You need **Node.js 18+** and **Git**. No local database: the team shares one Supabase project, which is already set up.
 
-### 1. Database (already set up in Supabase — only redo this for a fresh project)
-1. Open the Supabase project → **SQL Editor** → **New query**.
-2. Paste and run each file in order: `01_schema.sql`, `02_security.sql`, `03_extras.sql`, `04_seed.sql`.
-3. Ask the project owner for the **Project URL** and **secret key** for `server/.env`. Never commit them.
+### 1. Get the code
+```bash
+git clone https://github.com/Lim-ZiYing/FSDP-ASG.git
+cd FSDP-ASG
+git checkout <your-branch>
+git pull origin main
+```
 
+Database (only for a brand-new Supabase project): in **SQL Editor → New query**, run the files in `database/` in order, `01` to `04`.
 Useful views: `menu_with_photo` (eMenu with top-voted photo), `top_photos`, `photo_votes`, `stall_queue`.
-Re-running `04_seed.sql` resets all data to the sample data.
 
 ### 2. Back end
 ```bash
 cd server
 npm install
-cp .env.example .env     # then fill in your own DB password and JWT secret
+cp .env.example .env
 npm run dev
 ```
-Check it works: open http://localhost:3000/api/health
+Fill in `.env` with the Supabase URL, the service role key and the JWT secret shared privately in the group chat. Check it works: http://localhost:3000/api/health
 
-### 3. Front end
+### 3. Front end (second terminal)
 ```bash
 cd client
 npm install
@@ -67,40 +92,26 @@ npm run dev
 ```
 Open http://localhost:5173
 
-## Features (mapped to Jira epics)
-
-| Epic | Feature | Status |
-|---|---|---|
-| Accounts & login | Register, log in, JWT auth | Starter code |
-| Stalls & eMenu | Stall list with live queue, eMenu with top-voted photos | Starter code |
-| Ordering & cart | Multi-stall cart, pick-up time, collection point | Tables ready |
-| NETS QR payment | Generate QR, confirm payment | To do |
-| Order history | Past orders, "reorder my usual" | Tables ready |
-| Photo upload + AI check | Upload dish photo, reject non-food | To do |
-| Upvoting & top photo | One vote per user per photo, earliest upload wins ties | Starter code |
-
 ## API overview
 
-| Method | Endpoint | Auth | What it does |
-|---|---|---|---|
-| GET | `/api/health` | – | Check the server is running |
-| POST | `/api/auth/register` | – | Create an account |
-| POST | `/api/auth/login` | – | Log in, returns a token |
-| GET | `/api/stalls` | – | List stalls with live queue |
-| GET | `/api/stalls/:id/menu` | – | Menu items with their top photo |
-| GET | `/api/photos/item/:itemId` | – | Community photos for a dish |
-| POST | `/api/photos/:photoId/vote` | ✓ | Upvote a photo (once per user) |
-| DELETE | `/api/photos/:photoId/vote` | ✓ | Remove your vote |
-| POST | `/api/orders` | ✓ | Place an order (can span several stalls) |
-| GET | `/api/orders/mine` | ✓ | Your order history |
+| Method | Endpoint | Auth | Story | Owner |
+|---|---|---|---|---|
+| POST | `/api/auth/register` | – | FSDP-9 | Zi Ying |
+| POST | `/api/auth/login` | – | FSDP-35 | Zi Ying |
+| GET | `/api/auth/me` | ✓ | – | Zi Ying |
+| POST | `/api/auth/logout` | – | FSDP-10 | Zi Ying |
+| GET | `/api/hawker/orders` | hawker | FSDP-50 | Zi Ying |
+| PATCH | `/api/hawker/orders/:stallOrderId/status` | hawker | FSDP-51 | Zi Ying |
+| GET | `/api/stalls` | – | FSDP-11 | Siyu |
+| GET | `/api/stalls/:id/menu` | – | FSDP-12 | Siyu |
+| POST / DELETE | `/api/votes/:photoId` | ✓ | FSDP-22 | Siyu |
+| POST | `/api/orders` | ✓ | FSDP-14 | Lennox |
+| GET | `/api/orders/mine` | ✓ | FSDP-18 | Lennox |
+| GET | `/api/orders/:id` | ✓ | FSDP-43, 48 | Lennox |
+| POST | `/api/payments/:orderId/nets-qr` | ✓ | FSDP-16 | Declan |
+| GET | `/api/payments/:orderId/status` | ✓ | FSDP-17 | Declan |
+| GET | `/api/photos/item/:itemId` | – | FSDP-34 | Dana |
+| POST | `/api/photos/item/:itemId` | ✓ | FSDP-20 | Dana |
 
-## Team
-
-| Name | Main area |
-|---|---|
-| [Name] | [e.g. Accounts & login] |
-| [Name] | [e.g. Upvoting & top photo] |
-| [Name] | [e.g. NETS QR payment] |
-| [Name] | [e.g. Ordering & cart] |
-
-Links: [Jira board] · [Figma file](https://www.figma.com/design/HMrIlQdr3NR0NfztB5lc5X)
+## Links
+[Jira board] · [Figma file](https://www.figma.com/design/HMrIlQdr3NR0NfztB5lc5X)

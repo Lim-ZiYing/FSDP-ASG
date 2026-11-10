@@ -1,3 +1,0 @@
--- Owner: Dana
--- Test data. Dana: paste the contents of the shared "03_seed" script from the
--- Supabase SQL Editor here, so anyone can reset the database to the same starting point.

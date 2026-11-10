@@ -11,6 +11,7 @@
 | Front end | React (Vite) |
 | Back end | Node.js + Express |
 | Database | Supabase (PostgreSQL), plus Supabase Storage and Realtime |
+| Login | Own Express login (bcrypt passwords + JWT) |
 | Payment | NETS QR Web |
 | AI | Image check that rejects non-food photos |
 
@@ -30,7 +31,11 @@ The React app never talks to Supabase directly: every request goes **page → `a
 
 ```
 FSDP-ASG/
-├── database/          schema.sql, seed.sql (copies of the Supabase scripts)   Dana
+├── database/          copies of the Supabase scripts, run in this order       Dana
+│   ├── 01_schema.sql    creates all 14 tables
+│   ├── 02_security.sql  Row Level Security (menu data public, the rest private)
+│   ├── 03_extras.sql    order numbers, indexes, vote rules, views, photo bucket
+│   └── 04_seed.sql      sample data (WIPES all data, ask the group first)
 ├── docs/              CONTRIBUTING.md (team Git routine)
 ├── server/src/
 │   ├── index.js       starts the server; all routes already connected
@@ -57,7 +62,7 @@ Unbuilt endpoints return **501 "Not built yet (FSDP-xx)"** and unbuilt pages sho
 
 ## Getting started
 
-You need **Node.js 18+** and **Git**. No local database: the team shares one Supabase project.
+You need **Node.js 18+** and **Git**. No local database: the team shares one Supabase project, which is already set up.
 
 ### 1. Get the code
 ```bash
@@ -66,6 +71,9 @@ cd FSDP-ASG
 git checkout <your-branch>
 git pull origin main
 ```
+
+Database (only for a brand-new Supabase project): in **SQL Editor → New query**, run the files in `database/` in order, `01` to `04`.
+Useful views: `menu_with_photo` (eMenu with top-voted photo), `top_photos`, `photo_votes`, `stall_queue`.
 
 ### 2. Back end
 ```bash

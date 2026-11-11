@@ -1,18 +1,25 @@
-import { useEffect, useState } from 'react';
+// Owner: Siyu – FSDP-11 view list of stalls
+import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api.js';
 import StallCard from '../components/StallCard.jsx';
+import SkeletonList from '../components/SkeletonList.jsx';
+import './Browse.css';
 
 export default function Home() {
   const [stalls, setStalls] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setLoading(true);
+    setError('');
     api.getStalls()
       .then(setStalls)
-      .catch((e) => setError(e.message))
+      .catch(() => setError('Couldn’t load stalls. Check your connection and try again.'))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(load, [load]);
 
   return (
     <>
@@ -25,8 +32,14 @@ export default function Home() {
       </div>
 
       <h2>Stalls · shortest queue first</h2>
-      {loading && <p className="muted">Loading stalls…</p>}
-      {error && <p className="error">Couldn’t load stalls: {error}</p>}
+      {loading && <SkeletonList />}
+      {error && (
+        <div role="alert" className="empty">
+          <p className="error">{error}</p>
+          <button type="button" className="retry" onClick={load}>Try again</button>
+        </div>
+      )}
+      {!loading && !error && stalls.length === 0 && <p className="muted empty">No stalls to show yet.</p>}
       <div className="list">
         {stalls.map((s) => <StallCard key={s.id} stall={s} />)}
       </div>

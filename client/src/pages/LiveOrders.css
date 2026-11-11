@@ -66,3 +66,4 @@
 .step-done .step-dot { border-color: var(--orange); background: var(--orange); color: var(--white); }
 .step-current .step-dot { border-color: var(--orange); color: var(--orange); box-shadow: 0 0 0 4px var(--orange-soft); }
 .step-current { color: var(--ink); }
+.track-qr { margin-top: 12px; }

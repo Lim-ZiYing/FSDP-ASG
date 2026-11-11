@@ -257,3 +257,9 @@ img { display: block; max-width: 100%; }
   .skeleton, .live-dot { animation: none; }
   .switch::after { transition: none; }
 }
+
+
+/* Pickup QR (order confirmed and tracking pages) */
+.pickup-qr { display: flex; align-items: center; gap: 16px; width: 100%; padding: 16px; border-radius: var(--radius); background: var(--white); box-shadow: var(--shadow-sm); text-align: left; }
+.pickup-qr-code { flex-shrink: 0; padding: 8px; border: 2px solid var(--line); border-radius: 14px; background: var(--white); line-height: 0; }
+.pickup-qr-no { margin: 2px 0; font-family: 'Rubik', Arial, sans-serif; font-size: 30px; font-weight: 700; letter-spacing: 0.02em; }

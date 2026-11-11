@@ -1,6 +1,8 @@
+// Owner: Zi Ying – FSDP-10 sign up
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
+import AuthHero, { DemoLoginHint } from '../components/AuthHero.jsx';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -42,37 +44,41 @@ export default function Signup() {
   }
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit} noValidate>
-      <h1>Create account</h1>
+    <>
+      <AuthHero tagline="Order from any stall. One payment, one pick-up." />
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <h1>Create account</h1>
 
-      <label>
-        Name
-        <input type="text" autoComplete="name" value={displayName} maxLength={50}
-          onChange={(e) => setDisplayName(e.target.value)} placeholder="Tan Wei Ming" />
-      </label>
-      <label>
-        Email
-        <input type="email" autoComplete="email" value={email}
-          onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" />
-      </label>
-      <label>
-        Password
-        <input type="password" autoComplete="new-password" value={password}
-          onChange={(e) => setPassword(e.target.value)} />
-        <span className="hint">At least {MIN_PASSWORD_LENGTH} characters</span>
-      </label>
-      <label>
-        Confirm password
-        <input type="password" autoComplete="new-password" value={confirm}
-          onChange={(e) => setConfirm(e.target.value)} />
-      </label>
+        <label className="field">
+          Name
+          <input type="text" autoComplete="name" value={displayName} maxLength={50}
+            onChange={(e) => setDisplayName(e.target.value)} placeholder="Tan Wei Ming" />
+        </label>
+        <label className="field">
+          Email
+          <input type="email" autoComplete="email" value={email}
+            onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" />
+        </label>
+        <label className="field">
+          Password
+          <input type="password" autoComplete="new-password" value={password}
+            onChange={(e) => setPassword(e.target.value)} />
+          <span className="hint">At least {MIN_PASSWORD_LENGTH} characters</span>
+        </label>
+        <label className="field">
+          Confirm password
+          <input type="password" autoComplete="new-password" value={confirm}
+            onChange={(e) => setConfirm(e.target.value)} />
+        </label>
 
-      {error && <p className="error" role="alert">{error}</p>}
+        {error && <p className="notice notice-red" role="alert">{error}</p>}
 
-      <button type="submit" className="btn-primary" disabled={busy}>
-        {busy ? 'Creating account…' : 'Create account'}
-      </button>
-      <p className="muted center">Already have an account? <Link to="/login" className="link">Log in</Link></p>
-    </form>
+        <button type="submit" className="btn-primary" disabled={busy}>
+          {busy ? 'Creating account…' : 'Create account'}
+        </button>
+      </form>
+      <p className="muted center auth-switch">Already have an account? <Link to="/login" className="link">Log in</Link></p>
+      <DemoLoginHint />
+    </>
   );
 }

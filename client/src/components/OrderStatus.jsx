@@ -1,5 +1,7 @@
 // Owner: Zi Ying – FSDP-48
 // Live progress: Paid → Preparing → Ready → Collected.
+import Icon from './Icon.jsx';
+
 const STEPS = [
   { key: 'paid', label: 'Paid' },
   { key: 'preparing', label: 'Preparing' },
@@ -16,7 +18,7 @@ export default function OrderStatus({ status }) {
         const state = i < current ? 'done' : i === current ? 'current' : 'todo';
         return (
           <li key={step.key} className={`step step-${state}`} aria-current={state === 'current' ? 'step' : undefined}>
-            <span className="step-dot" aria-hidden="true">{state === 'done' ? '✓' : i + 1}</span>
+            <span className="step-dot" aria-hidden="true">{state === 'done' ? <Icon name="check" size={16} strokeWidth={3} /> : i + 1}</span>
             <span className="step-label">{step.label}</span>
           </li>
         );

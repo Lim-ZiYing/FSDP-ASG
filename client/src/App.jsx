@@ -1,7 +1,8 @@
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from './auth.jsx';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import RequireAuth from './components/RequireAuth.jsx';
 import BottomNav from './components/BottomNav.jsx';
+import MockBadge from './components/MockBadge.jsx';
+import { EmptyState } from './components/States.jsx';
 
 // Zi Ying
 import Login from './pages/Login.jsx';
@@ -16,36 +17,23 @@ import DishPage from './pages/DishPage.jsx';
 import Cart from './pages/Cart.jsx';
 import PickupTime from './pages/PickupTime.jsx';
 import OrderHistory from './pages/OrderHistory.jsx';
+import Receipt from './pages/Receipt.jsx';
 // Declan
 import Payment from './pages/Payment.jsx';
 import OrderConfirmed from './pages/OrderConfirmed.jsx';
 // Dana
 import UploadPhoto from './pages/UploadPhoto.jsx';
 
-// Pages that hide the top bar and bottom nav
-const FULL_SCREEN_PAGES = ['/login', '/signup'];
+// The bottom tab bar only shows on these main pages (the others have a back button instead)
+const NAV_PAGES = ['/', '/orders', '/snap'];
 
 export default function App() {
-  const { user, logout } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
-  const fullScreen = FULL_SCREEN_PAGES.includes(location.pathname);
-  const onHawkerPage = location.pathname.startsWith('/hawker');
-
-  async function handleLogout() {
-    await logout();
-    navigate('/login', { replace: true });
-  }
+  const showNav = NAV_PAGES.includes(location.pathname);
 
   return (
     <div className="app">
-      {user && !fullScreen && (
-        <header className="top-bar">
-          <span className="muted">Hi, {user.displayName}</span>
-          <button type="button" className="link-btn" onClick={handleLogout}>Log out</button>
-        </header>
-      )}
-
+      <MockBadge />
       <main className="screen">
         <Routes>
           {/* Zi Ying */}
@@ -60,9 +48,10 @@ export default function App() {
           <Route path="/dishes/:itemId" element={<DishPage />} />
 
           {/* Lennox */}
-          <Route path="/cart" element={<RequireAuth><Cart /></RequireAuth>} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/pickup" element={<RequireAuth><PickupTime /></RequireAuth>} />
           <Route path="/orders" element={<RequireAuth><OrderHistory /></RequireAuth>} />
+          <Route path="/orders/:orderId/receipt" element={<RequireAuth><Receipt /></RequireAuth>} />
 
           {/* Declan */}
           <Route path="/pay/:orderId" element={<RequireAuth><Payment /></RequireAuth>} />
@@ -72,11 +61,10 @@ export default function App() {
           <Route path="/snap" element={<RequireAuth><UploadPhoto /></RequireAuth>} />
           <Route path="/dishes/:itemId/upload" element={<RequireAuth><UploadPhoto /></RequireAuth>} />
 
-          <Route path="*" element={<p className="muted">Page not found.</p>} />
+          <Route path="*" element={<EmptyState icon="alert" title="Page not found" text="Check the link, or go back to the home page." />} />
         </Routes>
       </main>
-
-      {!fullScreen && !onHawkerPage && <BottomNav />}
+      {showNav && <BottomNav />}
     </div>
   );
 }

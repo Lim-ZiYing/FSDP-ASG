@@ -45,6 +45,7 @@ export const api = {
 
   // Stalls and eMenu – Siyu
   getStalls: () => request('/stalls'),
+  getStall: (stallId) => request(`/stalls/${stallId}`),
   getMenu: (stallId) => request(`/stalls/${stallId}/menu`),
 
   // Voting – Siyu

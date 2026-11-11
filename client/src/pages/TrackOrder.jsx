@@ -8,6 +8,7 @@ import { formatMoney, formatTime, minutesFromNow } from '../format.js';
 import OrderStatus from '../components/OrderStatus.jsx';
 import PageHeader from '../components/PageHeader.jsx';
 import Icon from '../components/Icon.jsx';
+import PickupQr from '../components/PickupQr.jsx';
 import { ErrorState, LoadingCards } from '../components/States.jsx';
 import './LiveOrders.css';
 
@@ -106,6 +107,10 @@ export default function TrackOrder() {
       )}
       {cooking && notify === 'granted' && (
         <p className="notice notice-green"><Icon name="bell" /> We’ll notify you when it’s ready.</p>
+      )}
+      
+      {['paid', 'preparing', 'ready'].includes(order.status) && (
+        <div className="track-qr"><PickupQr orderNo={order.orderNo} pointName={point?.name} /></div>
       )}
 
       <div className="card pickup-card">

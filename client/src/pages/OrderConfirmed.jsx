@@ -44,6 +44,8 @@ export default function OrderConfirmed() {
 
       <PickupQr orderNo={order.orderNo} pointName={order.collectionPoint?.name} />
 
+      <p className="notice notice-amber"><Icon name="bell" /> We’ll let you know when it’s ready. Keep this page or the Orders tab open.</p>
+
       <Link to={`/orders/${order.id}/track`} className="btn-primary">Track my order</Link>
       <Link to="/" className="btn-outline">Back to home</Link>
     </div>

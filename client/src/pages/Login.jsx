@@ -1,6 +1,8 @@
+// Owner: Zi Ying – FSDP-9/35 log in
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
+import AuthHero, { DemoLoginHint } from '../components/AuthHero.jsx';
 
 export default function Login() {
   const { login } = useAuth();
@@ -32,27 +34,30 @@ export default function Login() {
   }
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit} noValidate>
-      <h1>Log in</h1>
-      <p className="muted">Skip the queue. Order ahead, collect when it’s ready.</p>
+    <>
+      <AuthHero tagline="Skip the queue. Order ahead, collect when it’s ready." />
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <h1>Welcome back</h1>
 
-      <label>
-        Email
-        <input type="email" autoComplete="email" value={email}
-          onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" />
-      </label>
-      <label>
-        Password
-        <input type="password" autoComplete="current-password" value={password}
-          onChange={(e) => setPassword(e.target.value)} />
-      </label>
+        <label className="field">
+          Email
+          <input type="email" autoComplete="email" value={email}
+            onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" />
+        </label>
+        <label className="field">
+          Password
+          <input type="password" autoComplete="current-password" value={password}
+            onChange={(e) => setPassword(e.target.value)} />
+        </label>
 
-      {error && <p className="error" role="alert">{error}</p>}
+        {error && <p className="notice notice-red" role="alert">{error}</p>}
 
-      <button type="submit" className="btn-primary" disabled={busy}>
-        {busy ? 'Logging in…' : 'Log in'}
-      </button>
-      <p className="muted center">New here? <Link to="/signup" className="link">Create an account</Link></p>
-    </form>
+        <button type="submit" className="btn-primary" disabled={busy}>
+          {busy ? 'Logging in…' : 'Log in'}
+        </button>
+      </form>
+      <p className="muted center auth-switch">New here? <Link to="/signup" className="link">Create an account</Link></p>
+      <DemoLoginHint />
+    </>
   );
 }

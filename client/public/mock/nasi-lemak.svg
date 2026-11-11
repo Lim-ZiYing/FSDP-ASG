@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Nasi lemak (sample picture)">
+<rect width="400" height="300" fill="#1F6B2E"/>
+<circle cx="70" cy="40" r="60" fill="#fff" opacity=".12"/><circle cx="360" cy="270" r="80" fill="#000" opacity=".06"/>
+<ellipse cx="200" cy="162" rx="150" ry="118" fill="#000" opacity=".12"/>
+<ellipse cx="200" cy="155" rx="150" ry="118" fill="#7FB35A"/>
+<ellipse cx="200" cy="155" rx="124" ry="96" fill="#fff" opacity=".35"/>
+<ellipse cx="170" cy="150" rx="72" ry="56" fill="#FBF3DC"/><ellipse cx="158" cy="136" rx="42" ry="30" fill="#fff" opacity=".6"/><path d="M250 110 l 40 30 l -40 30 z" fill="#C2410C"/><ellipse cx="260" cy="200" rx="34" ry="26" fill="#fff"/><circle cx="260" cy="200" r="13" fill="#F2B134"/><ellipse cx="120" cy="222" rx="7" ry="4" fill="#C78A4A"/><ellipse cx="132" cy="228" rx="7" ry="4" fill="#C78A4A"/><ellipse cx="144" cy="222" rx="7" ry="4" fill="#C78A4A"/><ellipse cx="156" cy="228" rx="7" ry="4" fill="#C78A4A"/><ellipse cx="168" cy="222" rx="7" ry="4" fill="#C78A4A"/><ellipse cx="180" cy="228" rx="7" ry="4" fill="#C78A4A"/><rect x="250" y="70" width="4" height="16" rx="2" fill="#D9B98A"/><rect x="260" y="76" width="4" height="16" rx="2" fill="#D9B98A"/><rect x="270" y="70" width="4" height="16" rx="2" fill="#D9B98A"/><rect x="280" y="76" width="4" height="16" rx="2" fill="#D9B98A"/><rect x="290" y="70" width="4" height="16" rx="2" fill="#D9B98A"/>
+</svg>

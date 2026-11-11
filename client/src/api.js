@@ -85,7 +85,7 @@ const realApi = {
   getMenu: (stallId) => request(`/stalls/${stallId}/menu`),
   getDish: (itemId) => request(`/menu-items/${itemId}`),
   getTopDishes: (centreId) => request(`/centres/${centreId}/top-dishes`),
-  search: (q, centreId) => request(`/search${query({ q, centreId })}`),
+  search: (q, centreId) => request(`/stalls/search${query({ q, centreId })}`),
 
   // Voting – Siyu
   vote: (photoId) => request(`/votes/${photoId}`, { method: 'POST' }),

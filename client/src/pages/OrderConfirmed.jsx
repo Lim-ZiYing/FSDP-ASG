@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { api } from '../api.js';
 import { formatMoney, formatTime } from '../format.js';
 import Icon from '../components/Icon.jsx';
+import PickupQr from '../components/PickupQr.jsx';
 import { ErrorState, LoadingCards } from '../components/States.jsx';
 import './Order.css';
 
@@ -41,7 +42,7 @@ export default function OrderConfirmed() {
         <p className="small muted">{order.stalls.map((s) => s.name).join(' + ')}</p>
       </div>
 
-      <p className="notice notice-amber"><Icon name="bell" /> We’ll let you know when it’s ready. Keep this page or the Orders tab open.</p>
+      <PickupQr orderNo={order.orderNo} pointName={order.collectionPoint?.name} />
 
       <Link to={`/orders/${order.id}/track`} className="btn-primary">Track my order</Link>
       <Link to="/" className="btn-outline">Back to home</Link>

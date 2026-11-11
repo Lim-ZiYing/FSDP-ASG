@@ -42,6 +42,7 @@ export const api = {
   hawkerOrders: () => request('/hawker/orders'),
   updateStallOrderStatus: (stallOrderId, status) =>
     request(`/hawker/orders/${stallOrderId}/status`, { method: 'PATCH', body: { status } }),
+  trackOrder: (orderId) => request(`/track/${orderId}`),
 
   // Stalls and eMenu – Siyu
   getStalls: () => request('/stalls'),

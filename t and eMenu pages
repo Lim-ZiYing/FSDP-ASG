@@ -1,0 +1,26 @@
+[33mcommit e4f620c8b6d1626a2aa5b7f65be6381479767f1b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32msiyu[m[33m)[m
+Author: Ge Siyu <ge82475@163.com>
+Date:   Wed Nov 11 08:53:03 2026 +0800
+
+    update food image
+
+ client/src/api.js                   |  1 [32m+[m
+ client/src/components/FoodImage.jsx | 19 [32m+++++++++[m
+ server/src/routes/stalls.js         | 84 [32m++++++++++++++++++++++++++++++++++[m[31m---[m
+ 3 files changed, 98 insertions(+), 6 deletions(-)
+
+[33mcommit 4fe2478023118a617b71059623ec1921a5b8a8b0[m[33m ([m[1;31morigin/siyu[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: 56a9029 652aab9
+Author: Lim Zi Ying <limzy.ing07@gmail.com>
+Date:   Tue Nov 10 21:25:42 2026 +0800
+
+    Merge pull request #3 from Lim-ZiYing/dana
+    
+    database
+
+[33mcommit 652aab9c9e799c28f05b1a0f413b542f6eaad28e[m[33m ([m[1;31morigin/dana[m[33m)[m
+Merge: 0df8fc3 56a9029
+Author: DanielTun06 <S10274081@connect.np.edu.sg>
+Date:   Tue Nov 10 19:09:57 2026 +0800
+
+    Merge remote-tracking branch 'origin/main' into dana

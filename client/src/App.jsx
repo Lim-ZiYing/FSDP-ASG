@@ -67,6 +67,9 @@ export default function App() {
           {/* Declan */}
           <Route path="/pay/:orderId" element={<RequireAuth><Payment /></RequireAuth>} />
           <Route path="/orders/:orderId/confirmed" element={<RequireAuth><OrderConfirmed /></RequireAuth>} />
+          <Route path="/nets-qr" element={<NetsQrSamplePage />} />
+          <Route path="/nets-qr/success" element={<TxnNetsSuccessStatusPage />}/>
+          <Route path="/nets-qr/fail" element={<TxnNetsFailStatusPage />} />
 
           {/* Dana */}
           <Route path="/snap" element={<RequireAuth><UploadPhoto /></RequireAuth>} />

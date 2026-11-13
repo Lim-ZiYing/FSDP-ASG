@@ -111,9 +111,15 @@ const realApi = {
   deletePhoto: (photoId) => request(`/photos/${photoId}`, { method: 'DELETE' }),
 };
 
+// Built routes that read data made by an unbuilt one. While the maker is still fake, these
+// stay fake too, otherwise they look up a fake id in the real database and get "not found".
+const FOLLOWS = {
+  trackOrder: 'placeOrder',
+};
+
 function useMock(name) {
   if (MOCK_MODE === 'all') return true;
-  if (MOCK_MODE === 'unbuilt') return NOT_READY.has(name);
+  if (MOCK_MODE === 'unbuilt') return NOT_READY.has(name) || NOT_READY.has(FOLLOWS[name]);
   return false;
 }
 

@@ -32,6 +32,15 @@ function acceptPhoto(req, res, next) {
   });
 }
 
+// Works out the real image type from the file's first bytes, because the browser's
+// mimetype only reflects the file name. Returns a FILE_TYPES key, or null if it isn't one.
+function detectImageType(buffer) {
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return 'image/jpeg';
+  if (buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
+  if (buffer.length >= 12 && buffer.toString('latin1', 0, 4) === 'RIFF' && buffer.toString('latin1', 8, 12) === 'WEBP') return 'image/webp';
+  return null;
+}
+
 // Decide what happens to a photo from the AI result
 function decideStatus(ai) {
   if (!ai) return 'review';                                  // AI couldn't decide
@@ -66,6 +75,9 @@ router.post('/item/:itemId', requireAuth, acceptPhoto, async (req, res, next) =>
     if (!Number.isInteger(itemId) || itemId < 1) return res.status(400).json({ error: 'Invalid dish' });
     if (!req.file) return res.status(400).json({ error: 'Choose a JPG, PNG or WebP photo' });
 
+    const imageType = detectImageType(req.file.buffer);
+    if (!imageType) return res.status(400).json({ error: 'Choose a JPG, PNG or WebP photo' });
+
     const { data: dish, error: dishError } = await supabase
       .from('menu_items')
       .select('id, name')
@@ -80,7 +92,7 @@ router.post('/item/:itemId', requireAuth, acceptPhoto, async (req, res, next) =>
     let status;
     if (isConfigured()) {
       try {
-        ai = await checkFoodPhoto(req.file.buffer, req.file.mimetype, dish.name);
+        ai = await checkFoodPhoto(req.file.buffer, imageType, dish.name);
       } catch (err) {
         console.error('AI food check failed, sending photo to review:', err.message);
       }
@@ -94,10 +106,10 @@ router.post('/item/:itemId', requireAuth, acceptPhoto, async (req, res, next) =>
     }
 
     // 2. Save the image to Supabase Storage
-    const path = `items/${itemId}/${crypto.randomUUID()}.${FILE_TYPES[req.file.mimetype]}`;
+    const path = `items/${itemId}/${crypto.randomUUID()}.${FILE_TYPES[imageType]}`;
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
-      .upload(path, req.file.buffer, { contentType: req.file.mimetype });
+      .upload(path, req.file.buffer, { contentType: imageType });
     if (uploadError) throw uploadError;
     const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
 

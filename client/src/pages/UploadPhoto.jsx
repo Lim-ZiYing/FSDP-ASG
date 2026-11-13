@@ -124,7 +124,7 @@ export default function UploadPhoto() {
         {preview
           ? <img className="upload-preview" src={preview} alt="Preview of your photo" />
           : <span>Tap to take or choose a photo<br /><span className="hint">JPG, PNG or WebP, up to 5 MB</span></span>}
-        <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={handleFile} />
+        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFile} />
       </label>
 
       {error && <p className="error" role="alert">{error}</p>}

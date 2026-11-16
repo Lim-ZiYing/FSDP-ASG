@@ -1,6 +1,7 @@
 // Owner: Lennox – cart, ordering, pre-order and order history
-// Mounted at /api/orders. Agree the orders / stall_orders columns and
-// status names with Declan and Zi Ying before building.
+// Mounted at /api/orders. Each route must return the SAME shape as its function in client/src/mocks.js.
+// When yours works, delete its name from NOT_READY in client/src/api.js.
+// Agree the orders / stall_orders columns and status names with Declan and Zi Ying before building.
 const express = require("express");
 const { supabase } = require("../supabase");
 const { requireAuth } = require("../middleware/auth");
@@ -80,8 +81,9 @@ async function asapMinutesFor(stallIds) {
   return Math.max(5, ...stallIds.map((id) => 5 + 4 * (counts[id] || 0)));
 }
 
-// GET  /api/orders/pickup-slots    asapMinutes + the pick-up times a customer can choose
-// (must stay ABOVE /:id, otherwise "pickup-slots" is treated as an order id)
+// GET  /api/orders/pickup-slots?centreId=1&stallIds=1,2   pick-up times (FSDP-29, FSDP-33)   → mocks.js getPickupSlots
+//      returns { asapMinutes, cutoffMinutes, slots: [{ time, available }] }
+//      Keep this ABOVE '/:id', or Express will treat "pickup-slots" as an order id.
 router.get("/pickup-slots", async (req, res) => {
   const stallIds = String(req.query.stallIds || "")
     .split(",")
@@ -100,8 +102,9 @@ router.get("/pickup-slots", async (req, res) => {
   res.json({ asapMinutes, cutoffMinutes: 10, slots });
 });
 
-// POST /api/orders                 turn the cart into an order (FSDP-14; multi-stall FSDP-65 in Sprint 2)
-//      body: { items: [{ itemId, quantity }], collectionPointId, pickupTime }
+// POST /api/orders                 turn the cart into an order (FSDP-14, multi-stall FSDP-65)   → mocks.js placeOrder
+//      body: { centreId, collectionPointId, asap, pickupTime, items: [{ itemId, quantity, notes }] }
+//      returns { id, orderNo, totalCents, status: 'pending_payment' }
 //      Read prices from the database – never trust prices sent by the browser.
 router.post("/", async (req, res) => {
   const { items, collectionPointId, pickupTime, asap, centreId } = req.body;
@@ -233,7 +236,7 @@ router.post("/", async (req, res) => {
   });
 });
 
-// GET  /api/orders/mine            my past orders (FSDP-18)
+// GET  /api/orders/mine            my orders, newest first (FSDP-18)   → mocks.js myOrders
 router.get("/mine", async (req, res) => {
   const { data, error } = await supabase
     .from("orders")
@@ -245,7 +248,7 @@ router.get("/mine", async (req, res) => {
   res.json(data.map(shapeOrder));
 });
 
-// GET  /api/orders/:id             one order with its status (used by OrderConfirmed and TrackOrder)
+// GET  /api/orders/:id             one order as a receipt (FSDP-43, FSDP-45)   → mocks.js getOrder
 router.get("/:id", async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id))
@@ -262,7 +265,8 @@ router.get("/:id", async (req, res) => {
   res.json(shapeOrder(data));
 });
 
-// POST /api/orders/:id/cancel      only allowed before payment
+// POST /api/orders/:id/cancel      cancel before payment only (FSDP-44)   → mocks.js cancelOrder
+//      returns { status: 'cancelled' }   409 if already paid
 router.post("/:id/cancel", async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id))

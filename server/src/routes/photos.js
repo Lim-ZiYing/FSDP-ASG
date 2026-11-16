@@ -145,5 +145,8 @@ router.post('/item/:itemId', requireAuth, acceptPhoto, async (req, res, next) =>
     next(err);
   }
 });
+// DELETE /api/photos/:photoId     delete your OWN photo (FSDP-46)   → mocks.js deletePhoto
+//        returns 204 (no body)   403 if it isn't yours
+router.delete('/:photoId', requireAuth, notBuilt('FSDP-46'));
 
 module.exports = router;

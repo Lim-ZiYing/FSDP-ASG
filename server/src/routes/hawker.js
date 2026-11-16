@@ -170,12 +170,65 @@ router.patch('/orders/:stallOrderId/status', async (req, res, next) => {
   }
 });
 
-// GET   /api/hawker/menu                           dishes of my stall(s) for the Menu tab (FSDP-53)   → mocks.js hawkerMenu
-//       returns [{ id, name, priceCents, category, isAvailable }]
-router.get('/menu', notBuilt('FSDP-53'));
+// GET /api/hawker/menu   (FSDP-53)
+// Every dish of my stall(s), for the Menu tab where the hawker switches dishes on and off.
+// Returns [{ id, stallId, name, priceCents, category, isAvailable }]
+router.get('/menu', async (req, res, next) => {
+  try {
+    const stalls = await getMyStalls(req.user.userId);
+    if (stalls.length === 0) return res.json([]);
 
-// PATCH /api/hawker/menu-items/:itemId/sold-out   body: { isSoldOut }  (FSDP-53)   → mocks.js setItemSoldOut
-//       returns { id, isAvailable }
-router.patch('/menu-items/:itemId/sold-out', notBuilt('FSDP-53'));
+    const { data, error } = await supabase
+      .from('menu_items')
+      .select('id, stall_id, name, price_cents, category, is_available')
+      .in('stall_id', stalls.map((s) => s.id))
+      .order('category')
+      .order('name');
+    if (error) throw error;
+
+    res.json(data.map((item) => ({
+      id: item.id,
+      stallId: item.stall_id,
+      name: item.name,
+      priceCents: item.price_cents,
+      category: item.category,
+      isAvailable: item.is_available,
+    })));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PATCH /api/hawker/menu-items/:itemId/sold-out   body: { isSoldOut: true | false }   (FSDP-53)
+// Marks a dish sold out (or available again). Customers see "Sold out" on the eMenu straight away.
+// Returns { id, isAvailable }
+router.patch('/menu-items/:itemId/sold-out', async (req, res, next) => {
+  try {
+    const itemId = Number(req.params.itemId);
+    const { isSoldOut } = req.body || {};
+    if (!Number.isInteger(itemId) || itemId <= 0) {
+      return res.status(400).json({ error: 'Invalid dish' });
+    }
+    if (typeof isSoldOut !== 'boolean') {
+      return res.status(400).json({ error: 'isSoldOut must be true or false' });
+    }
+
+    // Only allow changing dishes that belong to this hawker's own stall(s)
+    const stalls = await getMyStalls(req.user.userId);
+    const { data, error } = await supabase
+      .from('menu_items')
+      .update({ is_available: !isSoldOut })
+      .eq('id', itemId)
+      .in('stall_id', stalls.map((s) => s.id))
+      .select('id, is_available')
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'That dish isn’t on your stall’s menu' });
+
+    res.json({ id: data.id, isAvailable: data.is_available });
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = router;

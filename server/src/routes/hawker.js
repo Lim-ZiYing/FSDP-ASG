@@ -170,7 +170,12 @@ router.patch('/orders/:stallOrderId/status', async (req, res, next) => {
   }
 });
 
-// PATCH /api/hawker/menu-items/:itemId/sold-out   body: { isSoldOut }  (FSDP-53, Sprint 2)
+// GET   /api/hawker/menu                           dishes of my stall(s) for the Menu tab (FSDP-53)   → mocks.js hawkerMenu
+//       returns [{ id, name, priceCents, category, isAvailable }]
+router.get('/menu', notBuilt('FSDP-53'));
+
+// PATCH /api/hawker/menu-items/:itemId/sold-out   body: { isSoldOut }  (FSDP-53)   → mocks.js setItemSoldOut
+//       returns { id, isAvailable }
 router.patch('/menu-items/:itemId/sold-out', notBuilt('FSDP-53'));
 
 module.exports = router;

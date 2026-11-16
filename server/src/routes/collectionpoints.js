@@ -1,4 +1,4 @@
-// Owner: Lennox – FSDP collection points for a hawker centre
+// Owner: Lennox – collection points for a hawker centre
 const express = require("express");
 const { supabase } = require("../supabase");
 

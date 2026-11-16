@@ -24,8 +24,6 @@ const NOT_READY = new Set([
   'getCollectionPoints', 'getPickupSlots', 'placeOrder', 'cancelOrder', 'myOrders', 'getOrder',
   // Declan
   'createNetsQr', 'paymentStatus',
-  // Zi Ying
-  'hawkerMenu', 'setItemSoldOut',
 ]);
 
 export function getToken() {

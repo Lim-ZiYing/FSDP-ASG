@@ -17,7 +17,7 @@ export const MOCK_MODE = import.meta.env.VITE_MOCK ?? (import.meta.env.DEV ? 'un
 
 const NOT_READY = new Set([
   // Siyu
-  'getCentres', 'getTopDishes', 'search', 'getDish', 'vote', 'unvote',
+  'getCentres', 'getTopDishes', 'search', 'getDish',
   // Dana
   'getPhotos', 'deletePhoto',
   // Lennox
@@ -115,6 +115,8 @@ const realApi = {
 // stay fake too, otherwise they look up a fake id in the real database and get "not found".
 const FOLLOWS = {
   trackOrder: 'placeOrder',
+  vote: 'getPhotos',   // votes need real photo ids, so stay fake until Dana's getPhotos is built
+  unvote: 'getPhotos',
 };
 
 function useMock(name) {

@@ -14,7 +14,7 @@ The `photos` table already has columns for all three: `ai_is_food`, `ai_matches_
 
 ## Options compared
 
-| | Image-labelling API (e.g. Google Cloud Vision, AWS Rekognition) | Food-specific model (e.g. Clarifai food model) | Vision LLM (Claude) |
+| | Image-labelling API (e.g. Google Cloud Vision, AWS Rekognition) | Food-specific model (e.g. Clarifai food model) | Vision LLM (Gemini or Claude) |
 |---|---|---|---|
 | "Is it food?" | Yes, via labels like *Food*, *Dish* | Yes | Yes |
 | "Is it **this** dish?" | Weak. Labels are generic (*Rice*, *Noodle*). Local dishes like *char kway teow* are rarely a label | Better, but only for dishes in its list | Yes. We pass the dish name in the prompt, so it works for any hawker dish |
@@ -22,13 +22,15 @@ The `photos` table already has columns for all three: `ai_is_food`, `ai_matches_
 | Reply format | Fixed label list we have to interpret | Fixed label list | Exact JSON shape we define (structured outputs) |
 | Reuse for other AI features in the epic (descriptions, translations, search) | No | No | Yes, same key and SDK |
 | Setup | Cloud project + service account JSON | Account + model ID | One API key in `server/.env` |
-| Node.js SDK | Yes | Yes | Yes (`@anthropic-ai/sdk`) |
+| Node.js SDK | Yes | Yes | Yes (`@google/genai`, `@anthropic-ai/sdk`) |
 
 ## Decision
 
-**Use Claude vision through the official Anthropic SDK.**
+**Use Gemini vision through the official Google GenAI SDK.**
 
-- It is the only option that answers question 2 for local dishes without us building a dish list.
+We first built this with Claude, then switched because this is a school project and the Gemini API has a free tier, while the Claude API is paid.
+
+- A vision LLM is the only option that answers question 2 for local dishes without us building a dish list.
 - Structured outputs guarantee the reply matches our schema, so the server never has to parse free text.
 - The same integration covers the other stories in the AI features epic.
 
@@ -51,26 +53,24 @@ The `photos` table already has columns for all three: `ai_is_food`, `ai_matches_
 
 ## Model and cost
 
-The model is set by `AI_MODEL` in `server/.env`, so the team can switch without code changes.
-Prices are Anthropic's list prices per million tokens (input / output), checked 6 Oct 2026. Check the current prices before the demo.
+The model is set by `GEMINI_MODEL` in `server/.env`, so the team can switch without code changes. The default is `gemini-3.5-flash-lite`.
+Google's pricing page lists both models below as free of charge on the free tier, checked 11 Nov 2026. Check the current limits in Google AI Studio before the demo.
 
-| Model | ID | Price per 1M tokens | Rough cost per photo* |
+| Model | ID | Free tier | Paid price per 1M tokens (input / output) |
 |---|---|---|---|
-| Claude Opus 5.5 (current default) | `claude-opus-5-5` | $4 / $20 | about 1 cent |
-| Claude Sonnet 5.5 | `claude-sonnet-5-5` | $2 / $10 | about half a cent |
-| Claude Haiku 5.5 | `claude-haiku-5-5` | $0.10 / $0.50 | well under 0.1 cent |
+| Gemini 3.5 Flash-Lite (current default) | `gemini-3.5-flash-lite` | Free of charge | $0.30 / $2.50 |
+| Gemini 3.8 Flash | `gemini-3.8-flash` | Free of charge | $0.75 / $3.75 until 31 Dec 2026, then $1.50 / $7.50 |
 
-\*Assumes a phone photo resized to about 1000×1000 px (≈1,300 input tokens) plus a few hundred output tokens. Large images are scaled down by the API, so the cost doesn't grow without limit.
-
-**Team decision needed:** Opus 5.5 is the most accurate. Haiku 5.5 costs about 40 times less and is probably enough for "is this food?". Suggestion: test both on 20 photos (10 hawker dishes, 10 non-food) in Sprint 2 and keep the cheapest one that gets them all right.
+Suggestion: test the default on 20 photos (10 hawker dishes, 10 non-food) in Sprint 2 and only move to 3.8 Flash if it gets some wrong.
 
 ## Risks
 
 - **API key:** only in `server/.env`, never in the React app or on GitHub.
-- **Cost if someone spams uploads:** the 5 MB limit and login requirement help. Add a per-user daily upload limit if needed (Sprint 2).
-- **Refusals or outages:** treated as `review`, so a failed check never auto-approves a photo.
+- **Free tier limits if someone spams uploads:** the 5 MB limit and login requirement help. Add a per-user daily upload limit if needed (Sprint 2).
+- **Free tier privacy:** Google may use free tier content to improve its products, so uploads should only be food photos and test images.
+- **Blocked replies, rate limits or outages:** treated as `review`, so a failed check never auto-approves a photo.
 
 ## Follow-up stories
 
-- FSDP-21 / FSDP-57: run the 20-photo test and set `AI_MODEL`.
+- FSDP-21 / FSDP-57: run the 20-photo test and set `GEMINI_MODEL`.
 - Hawker or admin screen to approve or reject `review` photos.

@@ -142,7 +142,7 @@ export default function UploadPhoto() {
             <span className="hint">JPG, PNG or WebP, up to 5 MB</span>
           </>
         )}
-        <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={handleFile} />
+        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFile} />
       </label>
       {preview && <p className="center"><span className="link-btn">Tap the photo to change it</span></p>}
 

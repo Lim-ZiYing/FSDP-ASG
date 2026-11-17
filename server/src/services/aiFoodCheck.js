@@ -1,28 +1,31 @@
 // Owner: Dana – AI "is this photo food?" check (FSDP-56 spike, FSDP-57, FSDP-21).
-// Provider chosen in the FSDP-56 spike: Claude vision (see docs/spike-FSDP-56-ai-provider.md).
+// Provider chosen in the FSDP-56 spike: Gemini vision (see docs/spike-FSDP-56-ai-provider.md).
 // Keep the API key in server/.env, never in code or the React app.
-const Anthropic = require('@anthropic-ai/sdk');
-const { zodOutputFormat } = require('@anthropic-ai/sdk/helpers/zod');
+const { GoogleGenAI } = require('@google/genai');
 const { z } = require('zod');
 
-const MODEL = process.env.AI_MODEL || 'claude-opus-5-5';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+const TIMEOUT_MS = 20000; // a slow AI call shouldn't hold up the upload; it goes to review instead
 
-// The exact JSON shape Claude must reply with
+// The exact JSON shape Gemini must reply with
 const FoodCheck = z.object({
   is_food: z.boolean(),        // the photo mainly shows food or a drink
   matches_dish: z.boolean(),   // it plausibly shows the named dish
-  confidence: z.number(),      // 0 to 1, how sure Claude is about is_food
+  confidence: z.number(),      // 0 to 1, how sure Gemini is about is_food
   reason: z.string(),          // one short sentence, for the logs and hawker review
 });
+const { $schema, ...responseJsonSchema } = z.toJSONSchema(FoodCheck);
 
 let client;
 function getClient() {
-  if (!client) client = new Anthropic(); // reads ANTHROPIC_API_KEY from .env
+  if (!client) {
+    client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, httpOptions: { timeout: TIMEOUT_MS } });
+  }
   return client;
 }
 
 function isConfigured() {
-  return Boolean(process.env.ANTHROPIC_API_KEY);
+  return Boolean(process.env.GEMINI_API_KEY);
 }
 
 // Checks one photo.
@@ -32,16 +35,13 @@ function isConfigured() {
 // Returns { isFood, matchesDish, confidence, reason }
 //   or null when the check could not give an answer (the photo should go to manual review).
 async function checkFoodPhoto(imageBuffer, mimeType, dishName) {
-  const response = await getClient().messages.parse({
+  const response = await getClient().models.generateContent({
     model: MODEL,
-    max_tokens: 1024,
-    output_config: { effort: 'low', format: zodOutputFormat(FoodCheck) },
-    messages: [{
+    contents: [{
       role: 'user',
-      content: [
-        { type: 'image', source: { type: 'base64', media_type: mimeType, data: imageBuffer.toString('base64') } },
+      parts: [
+        { inlineData: { mimeType, data: imageBuffer.toString('base64') } },
         {
-          type: 'text',
           text:
             `This photo was uploaded to a hawker centre food menu app for the dish "${dishName}". `
             + 'Is it a real photo of food or a drink (not a screenshot, meme, person or object)? '
@@ -49,12 +49,17 @@ async function checkFoodPhoto(imageBuffer, mimeType, dishName) {
         },
       ],
     }],
+    config: { responseMimeType: 'application/json', responseJsonSchema },
   });
 
-  // A refusal or a cut-off reply has no usable answer
-  if (response.stop_reason === 'refusal' || !response.parsed_output) return null;
+  // A blocked or cut-off reply has no usable answer
+  let out;
+  try {
+    out = FoodCheck.parse(JSON.parse(response.text));
+  } catch {
+    return null;
+  }
 
-  const out = response.parsed_output;
   return {
     isFood: out.is_food,
     matchesDish: out.matches_dish,

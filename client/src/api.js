@@ -23,7 +23,6 @@ const NOT_READY = new Set([
   // Lennox
   'getCollectionPoints', 'getPickupSlots', 'placeOrder', 'cancelOrder', 'myOrders', 'getOrder',
   // Declan
-  'createNetsQr', 'paymentStatus',
   // Zi Ying
   'hawkerMenu', 'setItemSoldOut',
 ]);

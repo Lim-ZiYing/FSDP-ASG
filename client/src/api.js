@@ -111,6 +111,9 @@ const realApi = {
 // stay fake too, otherwise they look up a fake id in the real database and get "not found".
 const FOLLOWS = {
   trackOrder: 'placeOrder',
+  createNetsQr: 'placeOrder',   // can't pay a real order until orders are real
+  paymentStatus: 'placeOrder',
+  
   vote: 'getPhotos',   // votes need real photo ids, so stay fake until Dana's getPhotos is built
   unvote: 'getPhotos',
 };

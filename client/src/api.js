@@ -17,9 +17,9 @@ export const MOCK_MODE = import.meta.env.VITE_MOCK ?? (import.meta.env.DEV ? 'un
 
 const NOT_READY = new Set([
   // Siyu
-  'getCentres', 'getTopDishes', 'search', 'getDish',
+  'getCentres', 'getTopDishes', 'search',
   // Dana
-  'getPhotos', 'deletePhoto',
+  'deletePhoto',
   // Lennox
   'getCollectionPoints', 'getPickupSlots', 'placeOrder', 'cancelOrder', 'myOrders', 'getOrder',
   // Declan

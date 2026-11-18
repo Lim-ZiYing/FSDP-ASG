@@ -1,6 +1,7 @@
 // Owner: Dana – photo upload, AI food check, top photo
 // Mounted at /api/photos. Images go to Supabase Storage; the AI call lives in services/aiFoodCheck.js.
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const express = require('express');
 const multer = require('multer');
 const { supabase } = require('../supabase');
@@ -49,8 +50,67 @@ function decideStatus(ai) {
   return 'approved';
 }
 
+// Reads the login token if there is one. Logged-out visitors can still see photos,
+// so this never blocks the request. Returns the user id, or null.
+function optionalUserId(req) {
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+  if (!token) return null;
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET).userId;
+  } catch {
+    return null;
+  }
+}
+
 // GET  /api/photos/item/:itemId           community photos for a dish, most votes first (FSDP-34)
-router.get('/item/:itemId', notBuilt('FSDP-34'));
+// Returns [{ id, url, votes, votedByMe, isMine, uploadedBy, createdAt }]  (same shape as mocks.js getPhotos)
+// Only approved photos are listed. votedByMe / isMine are filled in when a token is sent.
+router.get('/item/:itemId', async (req, res, next) => {
+  try {
+    const itemId = Number(req.params.itemId);
+    if (!Number.isInteger(itemId) || itemId < 1) return res.status(400).json({ error: 'Invalid dish' });
+    const me = optionalUserId(req);
+
+    const { data: photos, error } = await supabase
+      .from('photo_votes')
+      .select('photo_id, user_id, image_url, created_at, vote_count')
+      .eq('item_id', itemId)
+      .eq('status', 'approved')
+      .order('vote_count', { ascending: false })
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+
+    const ids = photos.map((p) => p.photo_id);
+    const userIds = [...new Set(photos.map((p) => p.user_id))];
+
+    const [{ data: users, error: usersError }, { data: myVotes, error: votesError }] = await Promise.all([
+      userIds.length
+        ? supabase.from('users').select('id, display_name').in('id', userIds)
+        : { data: [], error: null },
+      me && ids.length
+        ? supabase.from('votes').select('photo_id').eq('user_id', me).in('photo_id', ids)
+        : { data: [], error: null },
+    ]);
+    if (usersError) throw usersError;
+    if (votesError) throw votesError;
+
+    const names = new Map(users.map((u) => [u.id, u.display_name]));
+    const voted = new Set(myVotes.map((v) => v.photo_id));
+
+    res.json(photos.map((p) => ({
+      id: p.photo_id,
+      url: p.image_url,
+      votes: p.vote_count,
+      votedByMe: voted.has(p.photo_id),
+      isMine: p.user_id === me,
+      uploadedBy: names.get(p.user_id) || 'someone',
+      createdAt: p.created_at,
+    })));
+  } catch (err) {
+    next(err);
+  }
+});
 
 // GET  /api/photos/item/:itemId/top       the photo the eMenu shows for this dish (FSDP-23)
 // Returns { photo: { id, itemId, url, votes } } or { photo: null } if nobody has uploaded one yet.
@@ -145,5 +205,8 @@ router.post('/item/:itemId', requireAuth, acceptPhoto, async (req, res, next) =>
     next(err);
   }
 });
+// DELETE /api/photos/:photoId     delete your OWN photo (FSDP-46)   → mocks.js deletePhoto
+//        returns 204 (no body)   403 if it isn't yours
+router.delete('/:photoId', requireAuth, notBuilt('FSDP-46'));
 
 module.exports = router;

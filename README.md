@@ -1,176 +1,132 @@
 # Hawker eMenu
 
-**Revitalising Hawker Culture in a Digital Economy** — FSDP assignment.
+**Revitalising Hawker Culture in a Digital Economy** · FSDP, Team C33 · ByteHackz 2026
 
-*Skip the queue, not the meal.* A mobile-friendly web app for people in a rush, such as office workers on a short lunch break: pre-order from one or more hawker stalls, pay with NETS QR, and collect when the food is ready. Diners upload photos of dishes and upvote the best ones; the top-voted photo becomes the dish's picture on the eMenu.
+*Skip the queue, not the meal.*
+
+A mobile-friendly web app for people with a short lunch break. Pre-order from one or more hawker stalls, pay once with NETS QR, and collect when the food is ready. Diners upload photos of dishes and upvote the best ones; the top-voted photo becomes the dish's picture on the eMenu.
+
+## Try it live
+
+**https://hawker-emenu-c33.vercel.app** (best on a phone, or a desktop browser at phone size)
+
+| Role | Email | Password |
+|---|---|---|
+| Diner | demo@gmail.com | 12345678 |
+| Hawker | hawker@gmail.com | 12345678 |
+
+> The server runs on Render's free plan and sleeps when idle. The first load can take 30–60 seconds; after that it is fast.
+
+<p>
+  <img src="docs/screenshots/home.png" width="190" alt="Home: stalls with live queue times">
+  <img src="docs/screenshots/dish.png" width="190" alt="Dish page with community photos and upvotes">
+  <img src="docs/screenshots/cart.png" width="190" alt="One cart across three stalls">
+  <img src="docs/screenshots/ready.png" width="190" alt="Order tracking: your food is ready">
+</p>
+
+## The problem
+
+From our survey of 29 hawker centre diners:
+
+- **79%** have 45 minutes or less for lunch
+- **86%** have walked away from a long queue (52% do so often)
+- **76%** have to queue again at every stall when buying from more than one
+- **90%** would find live queue times useful; **86%** want to order from several stalls at once
+
+## Features
+
+**For diners**
+- Browse stalls with **live queue times**, sort by shortest wait, filter by CDC vouchers
+- **One cart across many stalls**, with a note for each dish
+- Choose **ASAP or a pick-up time** and a collection point
+- **Pay once with NETS QR** for the whole order
+- **Track the order** stall by stall and get told when everything is ready; show the **pick-up QR** to collect
+- Order history and receipts
+
+**Co-created eMenu**
+- Diners **upload real photos** of dishes
+- **AI (Google Gemini) rejects photos that are not food**
+- Diners **upvote** photos; the top-voted photo becomes the dish's picture on the menu
+
+**For hawkers**
+- **Live order board**: move each order from Preparing to Ready in one tap
+- **Mark dishes sold out** instantly so diners cannot order them
+
+## How it works
+
+```
+Phone browser ──► React app (Vercel) ──► Express API (Render) ──► Supabase (PostgreSQL + Storage)
+                                              ├──► NETS QR (payment)
+                                              └──► Google Gemini (food photo check)
+```
+
+The React app never talks to Supabase directly: every request goes **page → `api.js` → Express route → Supabase**. Only the server holds the keys. Prices are always read from the database on the server, never trusted from the phone.
 
 ## Tech stack
 
 | Layer | Technology |
 |---|---|
-| Front end | React (Vite), react-router, qrcode.react |
+| Front end | React (Vite), React Router, qrcode.react |
 | Back end | Node.js + Express |
-| Database | Supabase (PostgreSQL), plus Supabase Storage |
+| Database | Supabase (PostgreSQL) and Supabase Storage |
 | Login | Own Express login (bcrypt passwords + JWT) |
-| Payment | NETS QR |
-| AI | Image check that rejects non-food photos |
-
-The React app never talks to Supabase directly: every request goes **page → `api.js` → Express route → Supabase**. Only the server holds the Supabase keys.
+| Payment | NETS QR (sandbox) |
+| AI | Google Gemini image check |
+| Hosting | Vercel (front end), Render (back end) |
 
 ## Team
 
 | Name | Area |
 |---|---|
-| Zi Ying | Accounts, live orders, hawker side, front end |
-| Dana | Database (Supabase, test data), photo upload, AI food check |
+| Zi Ying | Accounts and login, live order tracking, hawker dashboard and sold out, all front-end screens, deployment |
+| Dana | Database (Supabase), photo upload, AI food check |
 | Declan | NETS QR payment |
-| Lennox | Cart, ordering, pre-order, order history |
+| Lennox | Cart, ordering, pick-up times, order history |
 | Siyu | Hawker centres, stall browsing, search, eMenu, voting |
 
-## How we build: front end first
+## Run it locally
 
-**Every screen for Sprints 1–3 is already built** and runs on fake data from `client/src/mocks.js`. Your job is to build the **server route** behind each screen.
+You need **Node.js 18+** and **Git**. There is no local database: the app uses the team's Supabase project.
 
-1. Find your function in `client/src/mocks.js`. The comment above it shows the **exact data shape** your route must return. That's the contract.
-2. Find your placeholder in `server/src/routes/…`. It returns **501 "Not built yet (FSDP-xx)"** until you replace `notBuilt(...)` with real code.
-3. When your route returns the same shape, **delete your function's name from `NOT_READY` in `client/src/api.js`**. The screen now uses your real route. You don't need to change any page.
-4. Test it, commit, push and open a pull request into main.
+**1. Get the code**
+```bash
+git clone https://github.com/Lim-ZiYing/FSDP-ASG.git
+cd FSDP-ASG
+```
 
-### Fake data switch (`client/.env`)
+**2. Back end**
+```bash
+cd server
+npm install
+copy .env.example .env     # macOS/Linux: cp .env.example .env
+npm run dev
+```
+Fill in `.env` with the values shared privately (never commit them). Check it works: http://localhost:3000/api/health
+
+**3. Front end** (second terminal)
+```bash
+cd client
+npm install
+copy .env.example .env     # macOS/Linux: cp .env.example .env
+npm run dev
+```
+Open http://localhost:5173. In Chrome press F12, then Ctrl+Shift+M to view it at phone size.
+
+### Demo-data switch (`client/.env`)
+
+We built every screen first on fake data, then connected each one to the real server as its route was finished. The switch is still there:
 
 | `VITE_MOCK=` | What you get |
 |---|---|
-| `all` | Everything fake. No server needed. Any email and password logs in; emails starting with `hawker` log in as a hawker. Good for demos. |
-| `unbuilt` (default) | Real server for everything already connected, fake for whatever is still in `NOT_READY`. Use this while building. |
+| `all` | Everything fake, no server needed. Any email logs in; emails starting with `hawker` log in as a hawker. |
+| `unbuilt` (default) | Real server for every finished route; fake data only for the names still in `NOT_READY` in `client/src/api.js`. |
 | `off` | Everything real. |
 
 Restart `npm run dev` after changing it. To reset the fake data: browser console → `localStorage.clear()` → refresh.
 
-## Integration checklist
+## API
 
-Tick these off as each route goes live (delete the name from `NOT_READY` when done).
-
-**Siyu**
-- [ ] `getCentres` → `GET /api/centres` (FSDP-68)
-- [ ] `getTopDishes` → `GET /api/centres/:id/top-dishes` (FSDP-22)
-- [ ] `getDish` → `GET /api/menu-items/:id` (FSDP-12)
-- [ ] `search` → `GET /api/stalls/search?q=&centreId=` (FSDP-41)
-- [ ] `vote` / `unvote` → `POST` / `DELETE /api/votes/:photoId` (FSDP-22)
-- [ ] `getStalls` also accepts `?centreId=` (FSDP-68)
-
-**Dana**
-- [ ] `getPhotos` → `GET /api/photos/item/:itemId`, including `votedByMe` and `isMine` (FSDP-34)
-- [ ] `deletePhoto` → `DELETE /api/photos/:photoId` (FSDP-46)
-- [x] `uploadPhoto` → returns **422** with a message when the photo isn't food (FSDP-21)
-
-**Lennox**
-- [ ] `getCollectionPoints` → `GET /api/centres/:id/collection-points` (FSDP-30)
-- [ ] `getPickupSlots` → `GET /api/orders/pickup-slots?centreId=&stallIds=` (FSDP-29, 33)
-- [ ] `placeOrder` → `POST /api/orders`, prices read from the database (FSDP-14, 65, 42)
-- [ ] `myOrders` → `GET /api/orders/mine` (FSDP-18)
-- [ ] `getOrder` → `GET /api/orders/:id` (FSDP-43, 45)
-- [ ] `cancelOrder` → `POST /api/orders/:id/cancel` (FSDP-44)
-
-**Declan**
-- [ ] `createNetsQr` → `POST /api/payments/:orderId/nets-qr`; send `qrImage` and the page shows the real NETS QR (FSDP-16, 44)
-- [ ] `paymentStatus` → `GET /api/payments/:orderId/status` (FSDP-17)
-
-**Zi Ying**
-- [ ] `hawkerMenu` → `GET /api/hawker/menu` (FSDP-53)
-- [ ] `setItemSoldOut` → `PATCH /api/hawker/menu-items/:itemId/sold-out` (FSDP-53)
-- [ ] Add `subtotalCents`, `stallCount` and `estimatedReadyAt` to `GET /api/hawker/orders` (FSDP-66)
-
-## Folder structure
-
-```
-FSDP-ASG/
-├── database/          Supabase scripts, run in this order                      Dana
-│   ├── 01_schema.sql    creates all tables
-│   ├── 02_security.sql  Row Level Security (menu data public, the rest private)
-│   ├── 03_extras.sql    order numbers, indexes, vote rules, views, photo bucket
-│   └── 04_seed.sql      sample data (WIPES all data, ask the group first)
-├── docs/              CONTRIBUTING.md (team Git routine), AI provider spike
-├── server/src/
-│   ├── index.js       starts the server; all routes already connected
-│   ├── supabase.js    shared Supabase connection
-│   ├── notBuilt.js    the 501 placeholder
-│   ├── middleware/    requireAuth, requireRole                                Zi Ying
-│   ├── routes/
-│   │   ├── auth.js       sign up, log in, log out                             Zi Ying
-│   │   ├── hawker.js     hawker orders, status, menu, sold out                Zi Ying
-│   │   ├── tracking.js   live order tracking                                  Zi Ying
-│   │   ├── centres.js    centres, top dishes · collection points       Siyu · Lennox
-│   │   ├── stalls.js     stall list, eMenu, search                            Siyu
-│   │   ├── menuItems.js  one dish for the dish page                           Siyu
-│   │   ├── votes.js      upvote, remove vote                                  Siyu
-│   │   ├── orders.js     pick-up slots, place, history, receipt, cancel       Lennox
-│   │   ├── payments.js   NETS QR, payment status                              Declan
-│   │   └── photos.js     upload, AI check, community photos, delete           Dana
-│   └── services/      nets.js (Declan), aiFoodCheck.js and topPhotos.js (Dana)
-└── client/
-    ├── public/mock/   sample food pictures used by the fake data
-    └── src/
-        ├── App.jsx      every page and its route
-        ├── api.js       every call to the server + the NOT_READY list (shared)
-        ├── mocks.js     fake data; the comments are the data contracts (shared)
-        ├── auth.jsx     who's logged in                                        Zi Ying
-        ├── cart.jsx     the cart, across many stalls                           Lennox
-        ├── centre.jsx   the chosen hawker centre                               Siyu
-        ├── index.css    shared design: colours, fonts, buttons, cards
-        ├── components/  reusable pieces (Icon, StallCard, MenuItemCard, Sheet…)
-        └── pages/       one file per screen, matching the Figma
-```
-
-### Screens and owners
-
-| Screen | File | Stories | Owner |
-|---|---|---|---|
-| Log in, Sign up | `Login.jsx`, `Signup.jsx` | FSDP-9, 35, 10 | Zi Ying |
-| Home | `Home.jsx` | FSDP-11, 40, 41, 68, 69 | Siyu |
-| Stall menu | `StallMenu.jsx` | FSDP-12, 65 | Siyu |
-| Dish page | `DishPage.jsx` | FSDP-22, 34, 46, 42 | Siyu, Dana |
-| Cart | `Cart.jsx` | FSDP-14, 15, 65, 42 | Lennox |
-| Pick-up time | `PickupTime.jsx` | FSDP-29, 33, 30 | Lennox |
-| Payment | `Payment.jsx` | FSDP-16, 17, 44 | Declan |
-| Order placed | `OrderConfirmed.jsx` | FSDP-43 | Declan |
-| Orders, Receipt | `OrderHistory.jsx`, `Receipt.jsx` | FSDP-18, 45 | Lennox |
-| Tracking | `TrackOrder.jsx` | FSDP-48, 32, 66, 49 | Zi Ying |
-| Hawker dashboard | `HawkerOrders.jsx` | FSDP-50, 51, 39, 53 | Zi Ying |
-| Upload photo | `UploadPhoto.jsx` | FSDP-20, 21 | Dana |
-
-## Getting started
-
-You need **Node.js 18+** and **Git**. No local database: the team shares one Supabase project, which is already set up.
-
-### 1. Get the code
-```bash
-git clone https://github.com/Lim-ZiYing/FSDP-ASG.git
-cd FSDP-ASG
-git checkout <your-branch>
-git pull origin main
-```
-
-### 2. Back end
-```bash
-cd server
-npm install
-copy .env.example .env
-npm run dev
-```
-Fill in `.env` with the values shared **privately** (never in GitHub, slides or screenshots). Check it works: http://localhost:3000/api/health
-
-### 3. Front end (second terminal)
-```bash
-cd client
-npm install
-copy .env.example .env
-npm run dev
-```
-Open http://localhost:5173. Press F12 → Ctrl+Shift+M to see it at phone size.
-
-Run `npm install` again in **both** folders whenever you pull main and someone has added a package.
-
-## API overview
+✓ = live on the real server. *Demo data* = the screen works but still uses sample data.
 
 | Method | Endpoint | Auth | Story | Owner | Status |
 |---|---|---|---|---|---|
@@ -180,31 +136,65 @@ Run `npm install` again in **both** folders whenever you pull main and someone h
 | POST | `/api/auth/logout` | – | FSDP-10 | Zi Ying | ✓ |
 | GET | `/api/hawker/orders` | hawker | FSDP-50 | Zi Ying | ✓ |
 | PATCH | `/api/hawker/orders/:stallOrderId/status` | hawker | FSDP-51 | Zi Ying | ✓ |
-| GET | `/api/hawker/menu` | hawker | FSDP-53 | Zi Ying | 501 |
-| PATCH | `/api/hawker/menu-items/:itemId/sold-out` | hawker | FSDP-53 | Zi Ying | 501 |
+| GET | `/api/hawker/menu` | hawker | FSDP-53 | Zi Ying | ✓ |
+| PATCH | `/api/hawker/menu-items/:itemId/sold-out` | hawker | FSDP-53 | Zi Ying | ✓ |
 | GET | `/api/track/:orderId` | ✓ | FSDP-48 | Zi Ying | ✓ |
-| GET | `/api/centres` | – | FSDP-68 | Siyu | 501 |
-| GET | `/api/centres/:id/top-dishes` | – | FSDP-22 | Siyu | 501 |
 | GET | `/api/stalls` | – | FSDP-11 | Siyu | ✓ |
 | GET | `/api/stalls/:id` | – | FSDP-11 | Siyu | ✓ |
 | GET | `/api/stalls/:id/menu` | – | FSDP-12 | Siyu | ✓ |
-| GET | `/api/stalls/search` | – | FSDP-41 | Siyu | 501 |
-| GET | `/api/menu-items/:id` | – | FSDP-12 | Siyu | 501 |
-| POST / DELETE | `/api/votes/:photoId` | ✓ | FSDP-22 | Siyu | 501 |
-| GET | `/api/centres/:id/collection-points` | – | FSDP-30 | Lennox | 501 |
-| GET | `/api/orders/pickup-slots` | ✓ | FSDP-29, 33 | Lennox | 501 |
-| POST | `/api/orders` | ✓ | FSDP-14, 65 | Lennox | 501 |
-| GET | `/api/orders/mine` | ✓ | FSDP-18 | Lennox | 501 |
-| GET | `/api/orders/:id` | ✓ | FSDP-43, 45 | Lennox | 501 |
-| POST | `/api/orders/:id/cancel` | ✓ | FSDP-44 | Lennox | 501 |
-| POST | `/api/payments/:orderId/nets-qr` | ✓ | FSDP-16 | Declan | 501 |
-| GET | `/api/payments/:orderId/status` | ✓ | FSDP-17 | Declan | 501 |
-| GET | `/api/photos/item/:itemId` | – | FSDP-34 | Dana | 501 |
+| GET | `/api/menu-items/:id` | – | FSDP-12 | Siyu | ✓ |
+| POST / DELETE | `/api/votes/:photoId` | ✓ | FSDP-22 | Siyu | ✓ |
+| GET | `/api/centres` | – | FSDP-68 | Siyu | Demo data |
+| GET | `/api/centres/:id/top-dishes` | – | FSDP-22 | Siyu | Demo data |
+| GET | `/api/stalls/search` | – | FSDP-41 | Siyu | Demo data |
+| GET | `/api/centres/:id/collection-points` | – | FSDP-30 | Lennox | ✓ |
+| GET | `/api/orders/pickup-slots` | ✓ | FSDP-29, 33 | Lennox | ✓ |
+| POST | `/api/orders` | ✓ | FSDP-14, 65 | Lennox | ✓ |
+| GET | `/api/orders/mine` | ✓ | FSDP-18 | Lennox | ✓ |
+| GET | `/api/orders/:id` | ✓ | FSDP-43, 45 | Lennox | ✓ |
+| POST | `/api/orders/:id/cancel` | ✓ | FSDP-44 | Lennox | ✓ |
+| POST | `/api/payments/:orderId/nets-qr` | ✓ | FSDP-16 | Declan | ✓ |
+| GET | `/api/payments/:orderId/status` | ✓ | FSDP-17 | Declan | ✓ |
+| GET | `/api/photos/item/:itemId` | – | FSDP-34 | Dana | ✓ |
 | GET | `/api/photos/item/:itemId/top` | – | FSDP-23 | Dana | ✓ |
 | POST | `/api/photos/item/:itemId` | ✓ | FSDP-20, 21 | Dana | ✓ |
-| DELETE | `/api/photos/:photoId` | ✓ | FSDP-46 | Dana | 501 |
+| DELETE | `/api/photos/:photoId` | ✓ | FSDP-46 | Dana | Demo data |
 
-Update the **Status** column when you finish a route.
+## Folder structure
+
+```
+FSDP-ASG/
+├── database/          Supabase scripts, run in order                            Dana
+│   ├── 01_schema.sql    all tables
+│   ├── 02_security.sql  Row Level Security (menu data public, the rest private)
+│   ├── 03_extras.sql    order numbers, indexes, vote rules, views, photo bucket
+│   └── 04_seed.sql      sample data (WIPES all data, ask the group first)
+├── docs/              team Git routine, AI provider spike, screenshots
+├── server/src/
+│   ├── index.js       starts the server and connects every route
+│   ├── supabase.js    shared Supabase connection
+│   ├── middleware/    requireAuth, requireRole                                  Zi Ying
+│   ├── routes/        auth, hawker, tracking, centres, stalls, menuItems,
+│   │                  votes, orders, payments, photos
+│   └── services/      nets.js (Declan), aiFoodCheck.js and topPhotos.js (Dana)
+└── client/
+    ├── public/mock/   sample food pictures
+    └── src/
+        ├── App.jsx      every page and its route
+        ├── api.js       every call to the server + the NOT_READY list
+        ├── mocks.js     demo data; the comments are the data contracts
+        ├── auth.jsx · cart.jsx · centre.jsx   shared app state
+        ├── components/  reusable pieces (StallCard, MenuItemCard, QueuePill, PickupQr…)
+        └── pages/       one file per screen, matching the Figma
+```
+
+## What's next
+
+- Real-time updates (no refresh needed)
+- Seat availability at the hawker centre
+- Rewards for diners who upload and vote
+- Dish suggestions based on time, budget and queue length
 
 ## Links
-[Jira board] · [Figma file](https://www.figma.com/design/HMrIlQdr3NR0NfztB5lc5X)
+
+[Live app](https://hawker-emenu-c33.vercel.app) · [Figma file](https://www.figma.com/design/HMrIlQdr3NR0NfztB5lc5X)

@@ -14,6 +14,7 @@ app.use('/api/auth', require('./routes/auth'));         // Zi Ying
 app.use('/api/hawker', require('./routes/hawker'));     // Zi Ying
 app.use('/api/track', require('./routes/tracking'));    // Zi Ying
 app.use('/api/stalls', require('./routes/stalls'));     // Siyu
+app.use('/api/centres', require('./routes/centres'));   // Siyu + Lennox
 app.use('/api/menu-items', require('./routes/menuItems')); // Siyu
 app.use('/api/votes', require('./routes/votes'));       // Siyu
 app.use('/api/orders', require('./routes/orders'));     // Lennox

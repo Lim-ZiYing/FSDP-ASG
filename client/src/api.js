@@ -22,8 +22,6 @@ const NOT_READY = new Set([
   'getPhotos', 'deletePhoto',
   // Lennox
   'getCollectionPoints', 'getPickupSlots', 'placeOrder', 'cancelOrder', 'myOrders', 'getOrder',
-  // Declan
-  'createNetsQr', 'paymentStatus',
 ]);
 
 export function getToken() {

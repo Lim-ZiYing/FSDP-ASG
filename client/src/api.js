@@ -9,36 +9,51 @@
 //
 // HOW TO CONNECT YOUR ROUTE: build it so it returns the same shape as your function in mocks.js,
 // then delete your function's name from NOT_READY below. That's it – the screens don't change.
-import { mockApi } from './mocks.js';
+import { mockApi } from "./mocks.js";
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-const TOKEN_KEY = 'token';
-export const MOCK_MODE = import.meta.env.VITE_MOCK ?? (import.meta.env.DEV ? 'unbuilt' : 'off');
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const TOKEN_KEY = "token";
+export const MOCK_MODE =
+  import.meta.env.VITE_MOCK ?? (import.meta.env.DEV ? "unbuilt" : "off");
 
 const NOT_READY = new Set([
   // Siyu
-  'getCentres', 'getTopDishes', 'search', 'getDish',
+  "getCentres",
+  "getTopDishes",
+  "search",
+  "getDish",
   // Dana
-  'getPhotos', 'deletePhoto',
+  "getPhotos",
+  "deletePhoto",
   // Lennox
-  'getCollectionPoints', 'getPickupSlots', 'placeOrder', 'cancelOrder', 'myOrders', 'getOrder',
   // Declan
-  'createNetsQr', 'paymentStatus',
+  "createNetsQr",
+  "paymentStatus",
 ]);
 
 export function getToken() {
-  try { return localStorage.getItem(TOKEN_KEY); } catch { return null; }
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
 }
 export function setToken(token) {
-  try { token ? localStorage.setItem(TOKEN_KEY, token) : localStorage.removeItem(TOKEN_KEY); } catch { /* storage blocked */ }
+  try {
+    token
+      ? localStorage.setItem(TOKEN_KEY, token)
+      : localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* storage blocked */
+  }
 }
 
-async function request(path, { method = 'GET', body, isForm = false } = {}) {
+async function request(path, { method = "GET", body, isForm = false } = {}) {
   const token = getToken();
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     headers: {
-      ...(isForm ? {} : { 'Content-Type': 'application/json' }),
+      ...(isForm ? {} : { "Content-Type": "application/json" }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: body ? (isForm ? body : JSON.stringify(body)) : undefined,
@@ -54,30 +69,44 @@ async function request(path, { method = 'GET', body, isForm = false } = {}) {
 }
 
 const query = (params) => {
-  const s = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')).toString();
-  return s ? `?${s}` : '';
+  const s = new URLSearchParams(
+    Object.entries(params).filter(
+      ([, v]) => v !== undefined && v !== null && v !== "",
+    ),
+  ).toString();
+  return s ? `?${s}` : "";
 };
 
 // The real server calls. The comment above each function in mocks.js shows the shape it must return.
 const realApi = {
   // Accounts – Zi Ying
   register: (displayName, email, password) =>
-    request('/auth/register', { method: 'POST', body: { displayName, email, password } }),
-  login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password } }),
-  me: () => request('/auth/me'),
-  logout: () => request('/auth/logout', { method: 'POST' }),
+    request("/auth/register", {
+      method: "POST",
+      body: { displayName, email, password },
+    }),
+  login: (email, password) =>
+    request("/auth/login", { method: "POST", body: { email, password } }),
+  me: () => request("/auth/me"),
+  logout: () => request("/auth/logout", { method: "POST" }),
 
   // Hawker side – Zi Ying
-  hawkerOrders: () => request('/hawker/orders'),
+  hawkerOrders: () => request("/hawker/orders"),
   updateStallOrderStatus: (stallOrderId, status) =>
-    request(`/hawker/orders/${stallOrderId}/status`, { method: 'PATCH', body: { status } }),
-  hawkerMenu: () => request('/hawker/menu'),
+    request(`/hawker/orders/${stallOrderId}/status`, {
+      method: "PATCH",
+      body: { status },
+    }),
+  hawkerMenu: () => request("/hawker/menu"),
   setItemSoldOut: (itemId, isSoldOut) =>
-    request(`/hawker/menu-items/${itemId}/sold-out`, { method: 'PATCH', body: { isSoldOut } }),
+    request(`/hawker/menu-items/${itemId}/sold-out`, {
+      method: "PATCH",
+      body: { isSoldOut },
+    }),
   trackOrder: (orderId) => request(`/track/${orderId}`),
 
   // Centres, stalls, search and eMenu – Siyu
-  getCentres: () => request('/centres'),
+  getCentres: () => request("/centres"),
   getStalls: ({ centreId } = {}) => request(`/stalls${query({ centreId })}`),
   getStall: (stallId) => request(`/stalls/${stallId}`),
   getMenu: (stallId) => request(`/stalls/${stallId}/menu`),
@@ -86,48 +115,64 @@ const realApi = {
   search: (q, centreId) => request(`/stalls/search${query({ q, centreId })}`),
 
   // Voting – Siyu
-  vote: (photoId) => request(`/votes/${photoId}`, { method: 'POST' }),
-  unvote: (photoId) => request(`/votes/${photoId}`, { method: 'DELETE' }),
+  vote: (photoId) => request(`/votes/${photoId}`, { method: "POST" }),
+  unvote: (photoId) => request(`/votes/${photoId}`, { method: "DELETE" }),
 
   // Orders – Lennox
-  getCollectionPoints: (centreId) => request(`/centres/${centreId}/collection-points`),
-  getPickupSlots: (centreId, stallIds) => request(`/orders/pickup-slots${query({ centreId, stallIds: stallIds.join(',') })}`),
-  placeOrder: (order) => request('/orders', { method: 'POST', body: order }),
-  cancelOrder: (orderId) => request(`/orders/${orderId}/cancel`, { method: 'POST' }),
-  myOrders: () => request('/orders/mine'),
+  getCollectionPoints: (centreId) =>
+    request(`/centres/${centreId}/collection-points`),
+  getPickupSlots: (centreId, stallIds) =>
+    request(
+      `/orders/pickup-slots${query({ centreId, stallIds: stallIds.join(",") })}`,
+    ),
+  placeOrder: (order) => request("/orders", { method: "POST", body: order }),
+  cancelOrder: (orderId) =>
+    request(`/orders/${orderId}/cancel`, { method: "POST" }),
+  myOrders: () => request("/orders/mine"),
   getOrder: (orderId) => request(`/orders/${orderId}`),
 
   // Payments – Declan
-  createNetsQr: (orderId) => request(`/payments/${orderId}/nets-qr`, { method: 'POST' }),
+  createNetsQr: (orderId) =>
+    request(`/payments/${orderId}/nets-qr`, { method: "POST" }),
   paymentStatus: (orderId) => request(`/payments/${orderId}/status`),
 
   // Photos – Dana
   getPhotos: (itemId) => request(`/photos/item/${itemId}`),
   getTopPhoto: (itemId) => request(`/photos/item/${itemId}/top`),
   uploadPhoto: (itemId, formData) =>
-    request(`/photos/item/${itemId}`, { method: 'POST', body: formData, isForm: true }),
-  deletePhoto: (photoId) => request(`/photos/${photoId}`, { method: 'DELETE' }),
+    request(`/photos/item/${itemId}`, {
+      method: "POST",
+      body: formData,
+      isForm: true,
+    }),
+  deletePhoto: (photoId) => request(`/photos/${photoId}`, { method: "DELETE" }),
 };
 
 // Built routes that read data made by an unbuilt one. While the maker is still fake, these
 // stay fake too, otherwise they look up a fake id in the real database and get "not found".
 const FOLLOWS = {
-  trackOrder: 'placeOrder',
-  vote: 'getPhotos',   // votes need real photo ids, so stay fake until Dana's getPhotos is built
-  unvote: 'getPhotos',
+  trackOrder: "placeOrder",
+  vote: "getPhotos", // votes need real photo ids, so stay fake until Dana's getPhotos is built
+  unvote: "getPhotos",
 };
 
 function useMock(name) {
-  if (MOCK_MODE === 'all') return true;
-  if (MOCK_MODE === 'unbuilt') return NOT_READY.has(name) || NOT_READY.has(FOLLOWS[name]);
+  if (MOCK_MODE === "all") return true;
+  if (MOCK_MODE === "unbuilt")
+    return NOT_READY.has(name) || NOT_READY.has(FOLLOWS[name]);
   return false;
 }
 
 // Pages import this. Each function picks real or fake when it's called.
 export const api = Object.fromEntries(
-  Object.keys(realApi).map((name) => [name, (...args) => (useMock(name) ? mockApi[name](...args) : realApi[name](...args))])
+  Object.keys(realApi).map((name) => [
+    name,
+    (...args) =>
+      useMock(name) ? mockApi[name](...args) : realApi[name](...args),
+  ]),
 );
 
 // True if any data on screen could be fake (shows the small "Demo data" badge)
-export const usingMocks = MOCK_MODE === 'all' || (MOCK_MODE === 'unbuilt' && NOT_READY.size > 0);
+export const usingMocks =
+  MOCK_MODE === "all" || (MOCK_MODE === "unbuilt" && NOT_READY.size > 0);
 export const isMocked = useMock;

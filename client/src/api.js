@@ -29,6 +29,18 @@ const NOT_READY = new Set([
   // Declan
   "createNetsQr",
   "paymentStatus",
+  "getCentres",
+  "getTopDishes",
+  "search",
+  // Dana
+  "deletePhoto",
+  // Lennox
+  "getCollectionPoints",
+  "getPickupSlots",
+  "placeOrder",
+  "cancelOrder",
+  "myOrders",
+  "getOrder",
 ]);
 
 export function getToken() {
@@ -152,6 +164,12 @@ const realApi = {
 // stay fake too, otherwise they look up a fake id in the real database and get "not found".
 const FOLLOWS = {
   trackOrder: "placeOrder",
+  vote: "getPhotos", // votes need real photo ids, so stay fake until Dana's getPhotos is built
+  unvote: "getPhotos",
+  trackOrder: "placeOrder",
+  createNetsQr: "placeOrder", // can't pay a real order until orders are real
+  paymentStatus: "placeOrder",
+
   vote: "getPhotos", // votes need real photo ids, so stay fake until Dana's getPhotos is built
   unvote: "getPhotos",
 };
